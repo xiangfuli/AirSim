@@ -110,6 +110,15 @@ public class AirSim : ModuleRules
 			// needed when packaging
 			PublicAdditionalLibraries.Add("stdc++");
 			PublicAdditionalLibraries.Add("supc++");
+
+            string GStreamerPath = "/usr/lib/x86_64-linux-gnu";
+            string GStreamerAPPPath = "/usr/lib/x86_64-linux-gnu/gstreamer-1.0";
+            PublicLibraryPaths.Add(GStreamerPath);
+            PublicLibraryPaths.Add(GStreamerAPPPath);
+            PublicAdditionalLibraries.Add("gstreamer-1.0");
+            PublicAdditionalLibraries.Add("gobject-2.0");
+            PublicAdditionalLibraries.Add("glib-2.0");
+            PublicAdditionalLibraries.Add("gstapp-1.0");
 		}
     }
 

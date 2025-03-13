@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef air_RpcLibServerBase_hpp
-#define air_RpcLibServerBase_hpp
+#ifndef RPCLIBSERVERBASE_HPP
+#define RPCLIBSERVERBASE_HPP
 
 #include "common/Common.hpp"
 #include "api/ApiServerBase.hpp"
 #include "api/ApiProvider.hpp"
+#include <map>
 
+class VideoEncoder;
 namespace msr
 {
 namespace airlib
@@ -67,7 +69,9 @@ namespace airlib
 
         struct impl;
         std::unique_ptr<impl> pimpl_;
+
+        std::map<std::string, VideoEncoder*> video_encoders_;
     };
 }
 } //namespace
-#endif
+#endif /* RPCLIBSERVERBASE_HPP */

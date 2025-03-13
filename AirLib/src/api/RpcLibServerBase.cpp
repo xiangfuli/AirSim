@@ -32,6 +32,8 @@ STRICT_MODE_OFF
 #include <functional>
 #include <thread>
 
+#include "VideoEncoder.h"
+
 STRICT_MODE_ON
 
 namespace msr
@@ -44,6 +46,7 @@ namespace airlib
         impl(string server_address, uint16_t port)
             : server(server_address, port)
         {
+            std::cout << "Starting the RpcLibServerBase..." << std::endl;
         }
 
         impl(uint16_t port)
@@ -147,6 +150,21 @@ namespace airlib
         pimpl_->server.bind("simGetImages", [&](const std::vector<RpcLibAdaptorsBase::ImageRequest>& request_adapter, const std::string& vehicle_name, bool external) -> vector<RpcLibAdaptorsBase::ImageResponse> {
             const auto& response = getWorldSimApi()->getImages(RpcLibAdaptorsBase::ImageRequest::to(request_adapter), vehicle_name, external);
             return RpcLibAdaptorsBase::ImageResponse::from(response);
+        });
+
+        pimpl_->server.bind("retrieveCameraH264Stream", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
+            std::vector<uint8_t> data = getWorldSimApi()->getImage(type, CameraDetails(camera_name, vehicle_name, external));
+
+            std::string ve_name = camera_name + "_" + std::to_string((int)type) + "_" + vehicle_name + "_" + std::to_string(external);
+            if (video_encoders_.find(ve_name) == video_encoders_.end()) {
+                video_encoders_[ve_name] = new VideoEncoder(640, 480);
+            }
+
+            std::vector<uint8_t> result;
+            video_encoders_[ve_name]->write(data, result);
+
+
+            return result;
         });
 
         pimpl_->server.bind("simGetImage", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
