@@ -272,6 +272,14 @@ __pragma(warning(disable : 4239))
             return result;
         }
 
+        vector<uint8_t> RpcLibClientBase::retrieveCameraH264Stream(vector<ImageCaptureBase::ImageRequest> request, const std::string& vehicle_name, bool external)
+        {
+            vector<uint8_t> result = pimpl_->client.call("retrieveCameraH264Stream", RpcLibAdaptorsBase::ImageRequest::from(request),
+                vehicle_name,
+                external).as<vector<uint8_t>>();
+            return result;
+        }
+
         //CinemAirSim
         std::vector<std::string> RpcLibClientBase::simGetPresetLensSettings(const std::string& camera_name, const std::string& vehicle_name, bool external)
         {
