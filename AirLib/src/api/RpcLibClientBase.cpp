@@ -272,9 +272,11 @@ __pragma(warning(disable : 4239))
             return result;
         }
 
-        vector<uint8_t> RpcLibClientBase::retrieveCameraH264Stream(const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name, bool external)
+        vector<uint8_t> RpcLibClientBase::retrieveCameraH264Stream(vector<ImageCaptureBase::ImageRequest> request, const std::string& vehicle_name, bool external)
         {
-            vector<uint8_t> result = pimpl_->client.call("retrieveCameraH264Stream", camera_name, type, vehicle_name, external).as<vector<uint8_t>>();
+            vector<uint8_t> result = pimpl_->client.call("retrieveCameraH264Stream", RpcLibAdaptorsBase::ImageRequest::from(request),
+                vehicle_name,
+                external).as<vector<uint8_t>>();
             return result;
         }
 

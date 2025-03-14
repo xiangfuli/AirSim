@@ -75,7 +75,7 @@ class VideoEncoder {
         }
     }
   
-    bool write(std::vector<uint8_t>& frame, std::vector<uint8_t>& encoded_data) {
+    bool write(const std::vector<uint8_t>& frame, std::vector<uint8_t>& encoded_data) {
         if (frame.empty()) return false;
 
         // 将帧推送到管道

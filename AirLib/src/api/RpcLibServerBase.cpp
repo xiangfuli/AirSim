@@ -152,19 +152,26 @@ namespace airlib
             return RpcLibAdaptorsBase::ImageResponse::from(response);
         });
 
-        pimpl_->server.bind("retrieveCameraH264Stream", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
-            std::vector<uint8_t> data = getWorldSimApi()->getImage(type, CameraDetails(camera_name, vehicle_name, external));
+        pimpl_->server.bind("retrieveCameraH264Stream", [&](const std::vector<RpcLibAdaptorsBase::ImageRequest>& request_adapter, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
+            std::cout << "Using getImages Api" << std::endl;
+            const auto& response = getWorldSimApi()->getImages(RpcLibAdaptorsBase::ImageRequest::to(request_adapter), vehicle_name, external);
 
-            std::string ve_name = camera_name + "_" + std::to_string((int)type) + "_" + vehicle_name + "_" + std::to_string(external);
+            const auto result = RpcLibAdaptorsBase::ImageResponse::from(response);
+
+            int camera_width = result[0].width;
+            int camera_height = result[0].height;
+
+            std::string ve_name = vehicle_name + "_" + std::to_string(camera_width) + "_" + std::to_string(camera_height) + "_" + std::to_string(external);
             if (video_encoders_.find(ve_name) == video_encoders_.end()) {
-                video_encoders_[ve_name] = new VideoEncoder(640, 480);
+                video_encoders_[ve_name] = new VideoEncoder(camera_width, camera_height);
+                std::cout << "Created video encoder: " << ve_name << std::endl;
             }
 
-            std::vector<uint8_t> result;
-            video_encoders_[ve_name]->write(data, result);
+            std::vector<uint8_t> stream_result;
+            std::cout << "Retrieved image data size: " << result[0].image_data_uint8.size() << std::endl;
+            video_encoders_[ve_name]->write(result[0].image_data_uint8, stream_result);
 
-
-            return result;
+            return stream_result;
         });
 
         pimpl_->server.bind("simGetImage", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
