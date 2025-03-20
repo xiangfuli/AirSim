@@ -114,6 +114,8 @@ namespace airlib
         vector<ImageCaptureBase::ImageResponse> simGetImages(vector<ImageCaptureBase::ImageRequest> request, const std::string& vehicle_name = "", bool external = false);
         vector<uint8_t> simGetImage(const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name = "", bool external = false);
         vector<uint8_t> retrieveCameraH264Stream(vector<ImageCaptureBase::ImageRequest> request, const std::string& vehicle_name = "", bool external = false);
+        bool emitTrapSignal(const std::string& vehicle_name, float trap_threshold);
+        vector<uint32_t> ifTrapped();
 
         //CinemAirSim
         std::vector<std::string> simGetPresetLensSettings(const std::string& camera_name, const std::string& vehicle_name = "", bool external = false);

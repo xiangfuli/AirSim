@@ -280,6 +280,14 @@ __pragma(warning(disable : 4239))
             return result;
         }
 
+        bool RpcLibClientBase::emitTrapSignal(const std::string& vehicle_name, float trap_threshold) {
+            return pimpl_->client.call("emitTrapSignal", vehicle_name, trap_threshold).as<bool>();
+        }
+
+        vector<uint32_t> RpcLibClientBase::ifTrapped() {
+            return pimpl_->client.call("ifTrapped").as<vector<uint32_t>>();
+        }
+
         //CinemAirSim
         std::vector<std::string> RpcLibClientBase::simGetPresetLensSettings(const std::string& camera_name, const std::string& vehicle_name, bool external)
         {
