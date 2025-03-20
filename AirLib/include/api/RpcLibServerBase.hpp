@@ -67,6 +67,12 @@ namespace airlib
 
         struct impl;
         std::unique_ptr<impl> pimpl_;
+
+        std::map<std::string, VideoEncoder*> video_encoders_;
+
+        // race check
+        uint32_t trap_times = false;
+        bool trapped = false;
     };
 }
 } //namespace
