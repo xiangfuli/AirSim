@@ -172,7 +172,7 @@ namespace airlib
             return getWorldSimApi()->getImage(type, CameraDetails(camera_name, vehicle_name, external));
         });
 
-        pimpl_->server.bind("emitTrapSignal", [&](const std::string& vehicle_name, float trap_threshold) -> bool {
+        pimpl_->server.bind("emitTrapSignal", [&](const std::string& vehicle_name, float trap_threshold, float sim_duration) -> bool {
             trapped = false;
             trap_times++;
             std::cout << "***************" << std::endl;
@@ -222,11 +222,11 @@ namespace airlib
             auto linear = getVehicleSimApi(closest_vehicle_name)->getGroundTruthKinematics()->twist.linear;
             // check if this vehicle will collide with the asked vehicle
             // simulate next 1 second and see if these two vehicle will collide
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < sim_duration/0.1; i++) {
                 Vector3r position = base_position + base_linear * 0.1 * i;
                 Vector3r other_position = pose.position + linear * 0.1 * i;
                 // output the trajecotry and distance
-                std::cout << "position: " << position << " other_position: " << other_position << " distance: " << (position - other_position).norm() << std::endl;
+                std::cout << "time: " << i*0.1 << "s, position: " << position << " other_position: " << other_position << " distance: " << (position - other_position).norm() << std::endl;
                 if ((position - other_position).norm() < trap_threshold) {
                     std::cout << "Collision detected" << std::endl;
                     trapped = true;
