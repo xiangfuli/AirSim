@@ -32,6 +32,8 @@ STRICT_MODE_OFF
 #include <functional>
 #include <thread>
 
+#include "VideoEncoder.h"
+
 STRICT_MODE_ON
 
 namespace msr

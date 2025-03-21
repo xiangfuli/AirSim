@@ -8,6 +8,7 @@
 #include "api/ApiServerBase.hpp"
 #include "api/ApiProvider.hpp"
 
+class VideoEncoder;
 namespace msr
 {
 namespace airlib

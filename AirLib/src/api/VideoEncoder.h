@@ -63,7 +63,7 @@ class VideoEncoder {
 
         // 启动管道
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
-    }   
+    }
 
     ~VideoEncoder() {
         if (pipeline) {
