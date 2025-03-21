@@ -14,10 +14,6 @@ include_directories(
   ${RPC_LIB_INCLUDES}
 )
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0>=1.4)
-pkg_search_module(gstreamer-app REQUIRED IMPORTED_TARGET gstreamer-app-1.0>=1.4)
-
 file(GLOB_RECURSE ${PROJECT_NAME}_sources 
   ${AIRSIM_ROOT}/${PROJECT_NAME}/src/api/*.cpp
   ${AIRSIM_ROOT}/${PROJECT_NAME}/src/common/common_utils/*.cpp
@@ -32,9 +28,6 @@ add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_sources})
 CommonTargetLink()
 target_link_libraries(${PROJECT_NAME} ${RPC_LIB})
 target_link_libraries(${PROJECT_NAME} MavLinkCom)
-target_link_libraries(${PROJECT_NAME} PkgConfig::gstreamer
-  PkgConfig::gstreamer-app
-)
 
 #string(SUBSTRING ${CMAKE_STATIC_LINKER_FLAGS} 9 -1 "BUILD_PLATFORM")
 #find_package(Threads REQUIRED)

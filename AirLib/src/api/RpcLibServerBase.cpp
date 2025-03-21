@@ -32,8 +32,6 @@ STRICT_MODE_OFF
 #include <functional>
 #include <thread>
 
-#include "VideoEncoder.h"
-
 STRICT_MODE_ON
 
 namespace msr
@@ -151,99 +149,8 @@ namespace airlib
             return RpcLibAdaptorsBase::ImageResponse::from(response);
         });
 
-        pimpl_->server.bind("retrieveCameraH264Stream", [&](const std::vector<RpcLibAdaptorsBase::ImageRequest>& request_adapter, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
-            const auto& response = getWorldSimApi()->getImages(RpcLibAdaptorsBase::ImageRequest::to(request_adapter), vehicle_name, external);
-
-            const auto result = RpcLibAdaptorsBase::ImageResponse::from(response);
-
-            int camera_width = result[0].width;
-            int camera_height = result[0].height;
-
-            std::string ve_name = vehicle_name + "_" + std::to_string(camera_width) + "_" + std::to_string(camera_height) + "_" + std::to_string(external);
-            if (video_encoders_.find(ve_name) == video_encoders_.end()) {
-                video_encoders_[ve_name] = new VideoEncoder(camera_width, camera_height);
-            }
-
-            std::vector<uint8_t> stream_result;
-            video_encoders_[ve_name]->write(result[0].image_data_uint8, stream_result);
-
-            return stream_result;
-        });
-
         pimpl_->server.bind("simGetImage", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name, bool external) -> vector<uint8_t> {
             return getWorldSimApi()->getImage(type, CameraDetails(camera_name, vehicle_name, external));
-        });
-
-        pimpl_->server.bind("emitTrapSignal", [&](const std::string& vehicle_name, float trap_threshold, float sim_duration) -> bool {
-            trapped = false;
-            trap_times++;
-            std::cout << "***************" << std::endl;
-            std::cout << "Detected trap signal from " << vehicle_name << std::endl;
-
-            // then we try to analyse the trajectories of the vehicle and check if there will be a collision
-            // if there is a collision, we return true, otherwise we return false
-            // we assume that the vehicle will move in a straight line
-            std::vector<std::string> vehicle_names = getWorldSimApi()->listVehicles();
-
-            std::cout << "Going to cehck all available vehicles: " << std::endl;
-            for (const auto& name : vehicle_names) {
-                std::cout << "Vehicle name: " << name << std::endl;
-            }
-
-            // get the pose of the vehicle with asked vehicle_name
-            const Kinematics::State* base_state = getVehicleSimApi(vehicle_name)->getGroundTruthKinematics();
-            auto base_pose = getWorldSimApi()->getObjectPose(vehicle_name);
-            Vector3r base_position = base_pose.position;
-            Vector3r base_linear = base_state->twist.linear;
-
-            std::cout << "Current state of the asked vehicle: " << std::endl;
-            std::cout << "Position: " << base_position.transpose() << std::endl;
-            std::cout << "Linear: " << base_linear.transpose() << std::endl;
-
-            // find the vehicle with the smallest distance to the asked vehicle
-            float min_distance = std::numeric_limits<float>::max();
-            std::string closest_vehicle_name;
-            for (const auto& name : vehicle_names) {
-                if (name == vehicle_name) continue;
-                std::cout << "Checking vehicle: " << name << std::endl;
-                auto pose = getWorldSimApi()->getObjectPose(name);
-                auto linear = getVehicleSimApi(name)->getGroundTruthKinematics()->twist.linear;
-                std::cout << "Position of the vehicle: " << pose.position.transpose() << std::endl;
-                float distance = (pose.position - base_position).norm();
-                std::cout << "Distance to the asked vehicle: " << distance << std::endl;
-                if (distance < min_distance) {
-                    min_distance = distance;
-                    closest_vehicle_name = name;
-                }
-            }
-
-            std::cout << "Find the closest vehicle: " << closest_vehicle_name << std::endl;
-
-            // get the pose of the other vehicles
-            auto pose = getWorldSimApi()->getObjectPose(closest_vehicle_name);
-            auto linear = getVehicleSimApi(closest_vehicle_name)->getGroundTruthKinematics()->twist.linear;
-            // check if this vehicle will collide with the asked vehicle
-            // simulate next 1 second and see if these two vehicle will collide
-            for (int i = 0; i < sim_duration/0.1; i++) {
-                Vector3r position = base_position + base_linear * 0.1 * i;
-                Vector3r other_position = pose.position + linear * 0.1 * i;
-                // output the trajecotry and distance
-                std::cout << "time: " << i*0.1 << "s, position: " << position << " other_position: " << other_position << " distance: " << (position - other_position).norm() << std::endl;
-                if ((position - other_position).norm() < trap_threshold) {
-                    std::cout << "Collision detected" << std::endl;
-                    trapped = true;
-                }
-            }
-            
-            std::cout << "***************" << std::endl;
-            return trapped;
-        });
-
-        pimpl_->server.bind("ifTrapped", [&]() -> vector<uint32_t> {
-            std::vector<uint32_t> result;
-            result.push_back(trap_times);
-            result.push_back(trapped);
-            return result;
         });
 
         //CinemAirSim
