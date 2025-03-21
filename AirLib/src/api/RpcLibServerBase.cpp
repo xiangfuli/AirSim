@@ -175,7 +175,7 @@ namespace airlib
             return getWorldSimApi()->getImage(type, CameraDetails(camera_name, vehicle_name, external));
         });
 
-        pimpl_->server.bind("emitTrapSignal", [&](const std::string& vehicle_name, float trap_threshold, float sim_duration) -> bool {
+        pimpl_->server.bind("emitTrapSignal", [&](const std::string& vehicle_name, float trap_threshold, float sim_duration) -> std::vector<float> {
             trapped = false;
             trap_times++;
             std::cout << "***************" << std::endl;
@@ -237,7 +237,11 @@ namespace airlib
             }
             
             std::cout << "***************" << std::endl;
-            return trapped;
+            
+            std::vector<float> result;
+            result.push_back(trapped);
+            result.push_back(min_distance);
+            return result;
         });
 
         pimpl_->server.bind("ifTrapped", [&]() -> vector<uint32_t> {
@@ -472,7 +476,7 @@ namespace airlib
         });
 
         pimpl_->server.bind("simListAssets", [&]() -> std::vector<std::string> {
-            return getWorldSimApi()->listAssets();
+            return getWorldSimApi()->listAssets();z ZZZZZZZZZZZZZZZZZZZ
         });
 
         pimpl_->server.bind("simGetObjectPose", [&](const std::string& object_name) -> RpcLibAdaptorsBase::Pose {

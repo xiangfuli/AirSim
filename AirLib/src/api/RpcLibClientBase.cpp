@@ -280,8 +280,8 @@ __pragma(warning(disable : 4239))
             return result;
         }
 
-        bool RpcLibClientBase::emitTrapSignal(const std::string& vehicle_name, float trap_threshold, float sim_duration) {
-            return pimpl_->client.call("emitTrapSignal", vehicle_name, trap_threshold, sim_duration).as<bool>();
+        std::vector<float> RpcLibClientBase::emitTrapSignal(const std::string& vehicle_name, float trap_threshold, float sim_duration) {
+            return pimpl_->client.call("emitTrapSignal", vehicle_name, trap_threshold, sim_duration).as<std::vector<float>>();
         }
 
         vector<uint32_t> RpcLibClientBase::ifTrapped() {
