@@ -378,7 +378,7 @@ namespace airlib
         });
 
         pimpl_->server.bind("simListAssets", [&]() -> std::vector<std::string> {
-            return getWorldSimApi()->listAssets();z ZZZZZZZZZZZZZZZZZZZ
+            return getWorldSimApi()->listAssets();
         });
 
         pimpl_->server.bind("simGetObjectPose", [&](const std::string& object_name) -> RpcLibAdaptorsBase::Pose {
