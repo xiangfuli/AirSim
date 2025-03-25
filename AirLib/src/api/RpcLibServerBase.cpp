@@ -195,11 +195,26 @@ namespace airlib
             const Kinematics::State* base_state = getVehicleSimApi(vehicle_name)->getGroundTruthKinematics();
             auto base_pose = getWorldSimApi()->getObjectPose(vehicle_name);
             Vector3r base_position = base_pose.position;
+            Quaternionr base_orientation = base_pose.orientation;
             Vector3r base_linear = base_state->twist.linear;
 
+            // Calculate velocity in world frame based on current orientation
+            // First create velocity vector in body frame (20 m/s along body x-axis)
+            Vector3r body_velocity(10, 0, 0); 
+            Vector3r gravity_vec(0, 0, 1); 
+
+            // Convert quaternion to rotation matrix
+            Matrix3x3r rotation_matrix = base_orientation.toRotationMatrix();
+
+            // Transform velocity from body to world frame
+            Vector3r world_velocity = rotation_matrix * body_velocity;
+            Vector3r gravity_vec_world = rotation_matrix * gravity_vec;
+            std::cout << "World velocity: " << world_velocity.transpose() << std::endl;
             std::cout << "Current state of the asked vehicle: " << std::endl;
             std::cout << "Position: " << base_position.transpose() << std::endl;
             std::cout << "Linear: " << base_linear.transpose() << std::endl;
+
+            base_linear += world_velocity;
 
             // find the vehicle with the smallest distance to the asked vehicle
             float min_distance = std::numeric_limits<float>::max();
@@ -230,10 +245,16 @@ namespace airlib
                 Vector3r other_position = pose.position + linear * 0.1 * i;
                 // output the trajecotry and distance
                 std::cout << "time: " << i*0.1 << "s, position: " << position << " other_position: " << other_position << " distance: " << (position - other_position).norm() << std::endl;
-                if ((position - other_position).norm() < trap_threshold) {
+                float distance = (position - other_position).norm();
+                if (distance < trap_threshold) {
                     std::cout << "Collision detected" << std::endl;
                     trapped = true;
                 }
+                if (distance < min_distance) {
+                    min_distance = distance;
+                }
+
+                base_linear += gravity_vec_world * 9.81 * 0.1;
             }
             
             std::cout << "***************" << std::endl;
